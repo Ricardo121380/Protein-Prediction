@@ -3,7 +3,6 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
 import numpy as np
-import pandas as pd
 
 # 假设氨基酸序列使用字母A-Z表示（实际上只有20种氨基酸），二级结构用'e', 'h', '_'表示
 amino_acids = 'ACDEFGHIKLMNPQRSTVWY'
@@ -41,8 +40,8 @@ class ProteinDataset(Dataset):
 
 
 # 示例：加载数据集
-train_dataset = ProteinDataset(r'C:\Users\11932\Desktop\Protein Prediction\protein-secondary-structure.train - 副本.txt')
-test_dataset = ProteinDataset(r'C:\Users\11932\Desktop\Protein Prediction\protein-secondary-structure.test - 副本.txt')
+train_dataset = ProteinDataset(r'C:\Users\11932\Desktop\Github\Protein-Prediction\protein-secondary-structure.train - 副本.txt')
+test_dataset = ProteinDataset(r'C:\Users\11932\Desktop\Github\Protein-Prediction\protein-secondary-structure.test - 副本.txt')
 
 # 创建DataLoader
 train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)  # 这里的batch_size根据实际情况调整
@@ -74,7 +73,6 @@ class SimpleNN(nn.Module):
         x = self.fc1(x)
         x = self.relu(x)
         x = self.fc2(x)
-        #x = torch.squeeze(x, 1)  # 移除第二个维度（索引为1的维度），如果它的大小是1
         return x
 
 
@@ -83,7 +81,7 @@ def train_model(model, train_loader, criterion, optimizer, num_epochs):
         for sequences, structures in train_loader:
             optimizer.zero_grad()
             outputs = model(sequences)
-            # Reshape the structures tensor if necessary
+
             if len(structures.shape) > 1:
                 structures = structures.squeeze()
             outputs = outputs.squeeze()
