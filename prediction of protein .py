@@ -35,7 +35,7 @@ class ProteinDataset(Dataset):
     def __getitem__(self, idx):
         # 将数据转换为Tensor
         sequence_tensor = torch.tensor(self.sequences[idx], dtype=torch.float32)
-        structure_tensor = torch.tensor(self.structures[idx], dtype=torch.long)  # 对于CrossEntropyLoss，target需要是long类型
+        structure_tensor = torch.tensor(self.structures[idx], dtype=torch.long)
         return sequence_tensor, structure_tensor
 
 
@@ -93,17 +93,25 @@ def train_model(model, train_loader, criterion, optimizer, num_epochs):
         print(f'Epoch [{epoch + 1}/{num_epochs}], Loss: {loss.item()}')
 
 
-def evaluate_model(model, test_loader):
+def evaluate_model(model, data_loader, criterion=None):
     model.eval()
     with torch.no_grad():
         correct = 0
         total = 0
-        for sequences, structures in test_loader:
+        loss_sum = 0
+        for sequences, structures in data_loader:
             outputs = model(sequences)
             _, predicted = torch.max(outputs.data, 1)
             total += structures.size(0)
             correct += (predicted == structures).sum().item()
-    print(f'Accuracy of the model on the test set: {100 * correct / total}%')
+            if criterion:
+                loss_sum += criterion(outputs, structures).item()
+
+    accuracy = 100 * correct / total
+    if criterion:
+        avg_loss = loss_sum / len(data_loader)
+        return avg_loss
+    return accuracy
 
 
 # 模型参数
@@ -121,7 +129,13 @@ train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
 test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
 
 train_model(model, train_loader, criterion, optimizer, num_epochs=20)
-evaluate_model(model, test_loader)
+
+# 评估训练集和测试集上的准确率
+train_accuracy = evaluate_model(model, train_loader)
+test_accuracy = evaluate_model(model, test_loader)
+
+print(f'Accuracy on training set: {train_accuracy}%')
+print(f'Accuracy on test set: {test_accuracy}%')
 
 
 
