@@ -47,21 +47,6 @@ test_dataset = ProteinDataset(r'C:\Users\11932\Desktop\Github\Protein-Prediction
 train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)  # 这里的batch_size根据实际情况调整
 test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
 
-
-# 这里仅展示模型构建、训练和评估的代码
-
-class ProteinDataset(Dataset):
-    def __init__(self, sequences, structures):
-        self.sequences = sequences  # 已经转换为one-hot编码
-        self.structures = structures  # 已经转换为整数标签
-
-    def __len__(self):
-        return len(self.sequences)
-
-    def __getitem__(self, idx):
-        return self.sequences[idx], self.structures[idx]
-
-
 class SimpleNN(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
         super(SimpleNN, self).__init__()
@@ -124,10 +109,6 @@ criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001, weight_decay=1e-5)
 
 # 训练和评估模型
-# 假设train_dataset和test_dataset已经准备好
-train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
-test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
-
 train_model(model, train_loader, criterion, optimizer, num_epochs=20)
 
 # 评估训练集和测试集上的准确率
